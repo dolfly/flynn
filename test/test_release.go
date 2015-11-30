@@ -184,11 +184,10 @@ func (s *ReleaseSuite) TestReleaseImages(t *c.C) {
 
 	// check system apps were deployed correctly
 	for _, app := range updater.SystemApps {
-		image := "flynn/" + app.Name
-		if app.Name == "postgres" {
-			image = "flynn/postgresql"
+		if app.Image == "" {
+			app.Image = "flynn/" + app.Name
 		}
-		debugf(t, "checking new %s release is using image %s", app.Name, versions[image])
+		debugf(t, "checking new %s release is using image %s", app.Name, versions[app.Image])
 		expected := fmt.Sprintf(`"finished deploy of system app" name=%s`, app.Name)
 		if !strings.Contains(updateOutput.String(), expected) {
 			t.Fatalf(`expected update to deploy %s`, app.Name)
@@ -201,6 +200,6 @@ func (s *ReleaseSuite) TestReleaseImages(t *c.C) {
 		debugf(t, "new %s artifact: %+v", app.Name, artifact)
 		uri, err := url.Parse(artifact.URI)
 		t.Assert(err, c.IsNil)
-		t.Assert(uri.Query().Get("id"), c.Equals, versions[image])
+		t.Assert(uri.Query().Get("id"), c.Equals, versions[app.Image])
 	}
 }
